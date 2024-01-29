@@ -1,0 +1,14 @@
+.nextButton {
+    -fx-background-color: #222222;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+}
+.nextButton:hover {
+    -fx-background-color: #000000;
+}
+.borderStyles {
+    -fx-background-radius: 20;
+}
+.centeredContent {
+    -fx-alignment: center;
+}
