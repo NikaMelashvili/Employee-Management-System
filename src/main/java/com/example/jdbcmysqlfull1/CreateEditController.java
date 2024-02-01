@@ -1,18 +1,19 @@
 package com.example.jdbcmysqlfull1;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CreateEditController {
@@ -31,7 +32,8 @@ public class CreateEditController {
     String newTableNameForQuery;
     ObservableList<String> selectedValues = FXCollections.observableArrayList();
     ObservableList<StringProperty> rows = FXCollections.observableArrayList();
-    Database db = new Database(url ,user ,password ,dataBase);
+    private TableView<Employee> dataSheet = new TableView<>();
+    Database db = new Database(url,user,password,dataBase);
     double initialY = 50.0;
     public void nextTableBtnAction() {
         newTableNameForQuery = createTableField.getText();
@@ -44,9 +46,9 @@ public class CreateEditController {
         AtomicReference<Double> n = new AtomicReference<>(0.0);
         double totalHeight = 0.0;
         for (int i = 0; i < columnAmount; i++) {
-            Label colNum = new Label("Enter column N" + (i + 2) + " name");
+            Label colNum = new Label("Enter column N" + (i + 1) + " name");
             TextField columnNum = new TextField();
-            columnNum.setStyle("-fx-background-radius: 30;");
+            columnNum.getStyleClass().add(".borderStyles");
             ComboBox<String> comboBox = new ComboBox<>();
             comboBox.getStyleClass().add("custom-combo-box");
             comboBox.getItems().addAll(
@@ -55,7 +57,6 @@ public class CreateEditController {
                     "DATE",
                     "DECIMAL"
             );
-
             AnchorPane.setLeftAnchor(colNum, 10.0);
             AnchorPane.setTopAnchor(colNum, initialY + n.get());
             AnchorPane.setLeftAnchor(columnNum, 10.0);
@@ -63,12 +64,11 @@ public class CreateEditController {
             AnchorPane.setTopAnchor(comboBox, initialY + 30.0 + n.get());
             AnchorPane.setLeftAnchor(comboBox, 200.0);
 
+            comboBox.setLayoutX(colNum.getLayoutX() + colNum.prefWidth(0));
             n.updateAndGet(v -> v + 60.0);
-            comboBox.setLayoutX(colNum.getLayoutX() + colNum.prefWidth(0) + 10);
             totalHeight = initialY + n.get();
 
             layout.getChildren().addAll(colNum, columnNum, comboBox);
-
             int finalI = i;
             columnNum.textProperty().addListener((observable, oldValue, newValue) -> {
                 cols[finalI] = newValue;
@@ -83,6 +83,7 @@ public class CreateEditController {
         }
         Button createTableBtn = new Button("Create");
         createTableBtn.getStyleClass().add("nextButton");
+        createTableBtn.setLayoutX(50.0);
         AnchorPane.setTopAnchor(createTableBtn, totalHeight + 20.0);
         layout.getChildren().add(createTableBtn);
 
@@ -117,12 +118,15 @@ public class CreateEditController {
             }
             Button addRowBtn = new Button("Add row");
             addRowBtn.getStyleClass().add("nextButton");
+            addRowBtn.setLayoutX(50.0);
             AnchorPane.setTopAnchor(addRowBtn, finalTotalHeight + 20.0);
             layout.getChildren().add(addRowBtn);
 
             addRowBtn.setOnAction(event1 -> {
                 try {
                     db.addRow(rows);
+                    db.getAllEmployees();
+                    tableViewing(db.dataTypesSql, db.columnProperties);
                     for (TextField textField : rowNumTextFields) {
                         textField.clear();
                     }
@@ -131,5 +135,37 @@ public class CreateEditController {
                 }
             });
         });
+    }
+    public void tableViewing(ObservableList<String> dataTypes, ObservableList<String> columnProps) {
+        dataSheet.getColumns().clear();
+
+//        TableColumn<Employee, ?> columnName;
+
+        for(int i = 0; i < columnProps.size(); i++){
+            String columnType = dataTypes.get(i);
+            if("INT".equalsIgnoreCase(columnType) || "DECIMAL".equalsIgnoreCase(columnType)){
+                if("INT".equalsIgnoreCase(columnType)){
+                    TableColumn<Employee, Number> intCol = new TableColumn<>(columnProps.get(i));
+                    intCol.setCellValueFactory(cellData -> cellData.getValue().intValueProperty());
+                    dataSheet.getColumns().add(intCol);
+                } else{
+                    TableColumn<Employee, Number> doubleCol = new TableColumn<>(columnProps.get(i));
+                    doubleCol.setCellValueFactory(cellData -> cellData.getValue().doubleValueProperty());
+                    dataSheet.getColumns().add(doubleCol);
+                }
+            } else if("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)){
+                TableColumn<Employee, String> stringCol = new TableColumn<>(columnProps.get(i));
+                stringCol.setCellValueFactory(cellData -> cellData.getValue().stringValueProperty());
+                dataSheet.getColumns().add(stringCol);
+            }
+        }
+        refreshData();
+        AnchorPane.setRightAnchor(dataSheet, 10.0);
+        layout.getChildren().add(dataSheet);
+    }
+    private void refreshData() {
+        dataSheet.getItems().clear();
+        AnchorPane.setRightAnchor(dataSheet, 10.0);
+        layout.getChildren().add(dataSheet);
     }
 }

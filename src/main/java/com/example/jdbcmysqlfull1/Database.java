@@ -1,13 +1,17 @@
 package com.example.jdbcmysqlfull1;
 
-import javafx.beans.property.StringProperty;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
 
 import java.sql.*;
 import java.util.List;
 
-public class Database {
+public class Database implements Property<Object> {
     String url;
     String user;
     String password;
@@ -144,5 +148,100 @@ public class Database {
                 connection.close();
             }
         }
+    }
+    public ObservableList<Employee> getAllEmployees() throws SQLException {
+        ObservableList<Employee> emp = FXCollections.observableArrayList();
+
+        Connection connection = getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + userTableName);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        CreateEditController createEditController = new CreateEditController();
+
+        while (resultSet.next()) {
+            ObservableList<String> columnProperties = createEditController.db.columnProperties;
+            ObservableList<StringProperty> rows = createEditController.rows;
+
+            for (int i = 0; i < columnProperties.size(); i++) {
+                String columnName = columnProperties.get(i);
+                String columnType = dataTypesSql.get(i);
+
+                if ("INT".equals(columnType)) {
+                    int intValue = resultSet.getInt(columnName);
+                    emp.add(new Employee(intValue));
+                } else if (("VARCHAR".equals(columnType)) || ("DATE".equals(columnType))) {
+                    String stringValue = resultSet.getString(columnName);
+                    emp.add(new Employee(stringValue));
+                } else if ("DECIMAL".equals(columnType)) {
+                    double doubleValue = resultSet.getDouble(columnName);
+                    emp.add(new Employee(doubleValue));
+                }
+            }
+        }
+        return emp;
+    }
+
+    @Override
+    public Object getBean() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public void addListener(ChangeListener<? super Object> changeListener) {
+
+    }
+
+    @Override
+    public void removeListener(ChangeListener<? super Object> changeListener) {
+
+    }
+
+    @Override
+    public Object getValue() {
+        return null;
+    }
+
+    @Override
+    public void setValue(Object o) {
+
+    }
+
+    @Override
+    public void bind(ObservableValue<?> observableValue) {
+
+    }
+
+    @Override
+    public void unbind() {
+
+    }
+
+    @Override
+    public boolean isBound() {
+        return false;
+    }
+
+    @Override
+    public void bindBidirectional(Property<Object> property) {
+
+    }
+
+    @Override
+    public void unbindBidirectional(Property<Object> property) {
+
+    }
+
+    @Override
+    public void addListener(InvalidationListener invalidationListener) {
+
+    }
+
+    @Override
+    public void removeListener(InvalidationListener invalidationListener) {
+
     }
 }

@@ -14,6 +14,8 @@ public class MainApplication extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("start-page.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
+        stage.setTitle("Employee management system");
+        stage.setResizable(false);
         stage.show();
     }
     public static void main(String[] args) {
