@@ -1,26 +1,23 @@
 package com.example.jdbcmysqlfull1;
 
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CreateEditController {
-    String url = "jdbc:mysql://localhost:3307/mydb";
+    String url = "jdbc:mysql://localhost:3307/java";
     String user = "root";
     String password = "thegoatlevi123";
-    String dataBase = "mydb";
+    String dataBase = "java";
     @FXML
     private TextField createTableField;
     @FXML
@@ -32,6 +29,7 @@ public class CreateEditController {
     String newTableNameForQuery;
     ObservableList<String> selectedValues = FXCollections.observableArrayList();
     ObservableList<StringProperty> rows = FXCollections.observableArrayList();
+    ObservableList<Employee> emp = FXCollections.observableArrayList();
     private TableView<Employee> dataSheet = new TableView<>();
     Database db = new Database(url,user,password,dataBase);
     double initialY = 50.0;
@@ -125,7 +123,6 @@ public class CreateEditController {
             addRowBtn.setOnAction(event1 -> {
                 try {
                     db.addRow(rows);
-                    db.getAllEmployees();
                     tableViewing(db.dataTypesSql, db.columnProperties);
                     for (TextField textField : rowNumTextFields) {
                         textField.clear();
@@ -136,36 +133,40 @@ public class CreateEditController {
             });
         });
     }
-    public void tableViewing(ObservableList<String> dataTypes, ObservableList<String> columnProps) {
+    public void tableViewing(ObservableList<String> dataTypes, ObservableList<String> columnProps) throws SQLException {
         dataSheet.getColumns().clear();
 
-//        TableColumn<Employee, ?> columnName;
-
-        for(int i = 0; i < columnProps.size(); i++){
+        for (int i = 0; i < columnProps.size(); i++) {
             String columnType = dataTypes.get(i);
-            if("INT".equalsIgnoreCase(columnType) || "DECIMAL".equalsIgnoreCase(columnType)){
-                if("INT".equalsIgnoreCase(columnType)){
+            if ("INT".equalsIgnoreCase(columnType) || "DECIMAL".equalsIgnoreCase(columnType)) {
+                if ("INT".equalsIgnoreCase(columnType)) {
                     TableColumn<Employee, Number> intCol = new TableColumn<>(columnProps.get(i));
                     intCol.setCellValueFactory(cellData -> cellData.getValue().intValueProperty());
                     dataSheet.getColumns().add(intCol);
-                } else{
+                } else {
                     TableColumn<Employee, Number> doubleCol = new TableColumn<>(columnProps.get(i));
                     doubleCol.setCellValueFactory(cellData -> cellData.getValue().doubleValueProperty());
                     dataSheet.getColumns().add(doubleCol);
                 }
-            } else if("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)){
+            } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
                 TableColumn<Employee, String> stringCol = new TableColumn<>(columnProps.get(i));
                 stringCol.setCellValueFactory(cellData -> cellData.getValue().stringValueProperty());
                 dataSheet.getColumns().add(stringCol);
+            } else {
+                System.out.println("Table viewing went wrong");
             }
         }
+        emp.addAll(db.getAllEmployees());
+        AnchorPane.setRightAnchor(dataSheet, 10.0);
+
+        if (!layout.getChildren().contains(dataSheet)) {
+            layout.getChildren().add(dataSheet);
+        }
         refreshData();
-        AnchorPane.setRightAnchor(dataSheet, 10.0);
-        layout.getChildren().add(dataSheet);
     }
-    private void refreshData() {
-        dataSheet.getItems().clear();
-        AnchorPane.setRightAnchor(dataSheet, 10.0);
-        layout.getChildren().add(dataSheet);
+    public void refreshData() throws SQLException {
+        emp.clear();
+        emp.addAll(db.getAllEmployees());
+        dataSheet.setItems(emp);
     }
 }

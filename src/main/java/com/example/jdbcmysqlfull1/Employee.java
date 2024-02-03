@@ -6,7 +6,6 @@ public class Employee {
     private final StringProperty stringValue;
     private final IntegerProperty intValue;
     private final DoubleProperty doubleValue;
-
     public Employee(String stringValue) {
         this.stringValue = new SimpleStringProperty(stringValue);
         this.intValue = new SimpleIntegerProperty(0);
@@ -24,7 +23,6 @@ public class Employee {
         this.intValue = new SimpleIntegerProperty(0);
         this.doubleValue = new SimpleDoubleProperty(doubleValue);
     }
-
     public StringProperty stringValueProperty() {
         return stringValue;
     }
@@ -36,28 +34,16 @@ public class Employee {
     public DoubleProperty doubleValueProperty() {
         return doubleValue;
     }
-
     public String getStringValue() {
         return stringValue.get();
-    }
-
-    public void setStringValue(String value) {
-        this.stringValue.set(value);
     }
 
     public int getIntValue() {
         return intValue.get();
     }
 
-    public void setIntValue(int value) {
-        this.intValue.set(value);
-    }
-
     public double getDoubleValue() {
         return doubleValue.get();
     }
 
-    public void setDoubleValue(double value) {
-        this.doubleValue.set(value);
-    }
 }

@@ -6,10 +6,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TableView;
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Database implements Property<Object> {
     String url;
@@ -17,6 +18,7 @@ public class Database implements Property<Object> {
     String password;
     String dataBaseName;
     String userTableName;
+    Map<String, String> columnData = new HashMap<>();
     ObservableList<String> dataTypesSql = FXCollections.observableArrayList();
     ObservableList<String> columnProperties = FXCollections.observableArrayList();
     public Database(String url, String user, String password, String dataBaseName){
@@ -48,18 +50,22 @@ public class Database implements Property<Object> {
                 switch (dataTypes.get(i)) {
                     case "INT":
                         dataTypesSql.add("INT");
+                        columnData.put(cols[i], dataTypes.get(i));
                         createQuery.append(dataTypes.get(i));
                         break;
                     case "DATE":
                         dataTypesSql.add("DATE");
+                        columnData.put(cols[i], dataTypes.get(i));
                         createQuery.append(dataTypes.get(i));
                         break;
                     case "VARCHAR":
                         dataTypesSql.add("VARCHAR");
+                        columnData.put(cols[i], dataTypes.get(i));
                         createQuery.append(dataTypes.get(i) + "(50)");
                         break;
                     case "DECIMAL":
                         dataTypesSql.add("DECIMAL");
+                        columnData.put(cols[i], dataTypes.get(i));
                         createQuery.append(dataTypes.get(i) + "(7, 3)");
                         break;
                     default:
@@ -141,6 +147,8 @@ public class Database implements Property<Object> {
             }
             preparedStatement.executeUpdate();
             System.out.println("Row has been inserted successfully");
+//            CreateEditController createEditController = new CreateEditController();
+//            createEditController.refreshData();
         } catch (SQLException e) {
             System.err.println("Error executing the query: " + e.getMessage());
         } finally {
@@ -150,35 +158,35 @@ public class Database implements Property<Object> {
         }
     }
     public ObservableList<Employee> getAllEmployees() throws SQLException {
-        ObservableList<Employee> emp = FXCollections.observableArrayList();
-
+        ObservableList<Employee> employeeList = FXCollections.observableArrayList();
         Connection connection = getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + userTableName);
         ResultSet resultSet = preparedStatement.executeQuery();
-        CreateEditController createEditController = new CreateEditController();
 
         while (resultSet.next()) {
-            ObservableList<String> columnProperties = createEditController.db.columnProperties;
-            ObservableList<StringProperty> rows = createEditController.rows;
-
-            for (int i = 0; i < columnProperties.size(); i++) {
-                String columnName = columnProperties.get(i);
+            ObservableList<Employee> data = FXCollections.observableArrayList(); // Move this line inside the loop
+            Employee employee;
+            for (int i = 0; i < dataTypesSql.size(); i++) {
                 String columnType = dataTypesSql.get(i);
-
-                if ("INT".equals(columnType)) {
-                    int intValue = resultSet.getInt(columnName);
-                    emp.add(new Employee(intValue));
-                } else if (("VARCHAR".equals(columnType)) || ("DATE".equals(columnType))) {
-                    String stringValue = resultSet.getString(columnName);
-                    emp.add(new Employee(stringValue));
-                } else if ("DECIMAL".equals(columnType)) {
-                    double doubleValue = resultSet.getDouble(columnName);
-                    emp.add(new Employee(doubleValue));
+                if ("INT".equalsIgnoreCase(columnType)) {
+                    int intType = resultSet.getInt(columnProperties.get(i));
+                    employee = new Employee(intType);
+                    data.add(employee);
+                } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
+                    String stringType = resultSet.getString(columnProperties.get(i));
+                    employee = new Employee(stringType);
+                    data.add(employee);
+                } else {
+                    double doubleType = resultSet.getDouble(columnProperties.get(i));
+                    employee = new Employee(doubleType);
+                    data.add(employee);
                 }
             }
+            employeeList.addAll(data);
         }
-        return emp;
+        return employeeList;
     }
+
 
     @Override
     public Object getBean() {

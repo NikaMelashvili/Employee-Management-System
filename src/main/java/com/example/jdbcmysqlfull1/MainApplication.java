@@ -7,10 +7,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class MainApplication extends Application {
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, SQLException {
         Parent root = FXMLLoader.load(getClass().getResource("start-page.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
