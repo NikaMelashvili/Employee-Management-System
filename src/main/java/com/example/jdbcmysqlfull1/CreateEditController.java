@@ -1,5 +1,7 @@
 package com.example.jdbcmysqlfull1;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -138,23 +140,19 @@ public class CreateEditController {
 
         for (int i = 0; i < columnProps.size(); i++) {
             String columnType = dataTypes.get(i);
+            TableColumn<Employee, Object> column = new TableColumn<>(columnProps.get(i));
+
             if ("INT".equalsIgnoreCase(columnType) || "DECIMAL".equalsIgnoreCase(columnType)) {
-                if ("INT".equalsIgnoreCase(columnType)) {
-                    TableColumn<Employee, Number> intCol = new TableColumn<>(columnProps.get(i));
-                    intCol.setCellValueFactory(cellData -> cellData.getValue().intValueProperty());
-                    dataSheet.getColumns().add(intCol);
-                } else {
-                    TableColumn<Employee, Number> doubleCol = new TableColumn<>(columnProps.get(i));
-                    doubleCol.setCellValueFactory(cellData -> cellData.getValue().doubleValueProperty());
-                    dataSheet.getColumns().add(doubleCol);
-                }
+                int finalI = i;
+                column.setCellValueFactory(cellData -> cellData.getValue().getProperty(finalI));
             } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
-                TableColumn<Employee, String> stringCol = new TableColumn<>(columnProps.get(i));
-                stringCol.setCellValueFactory(cellData -> cellData.getValue().stringValueProperty());
-                dataSheet.getColumns().add(stringCol);
+                int finalI1 = i;
+                column.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getProperty(finalI1).get()));
             } else {
                 System.out.println("Table viewing went wrong");
             }
+
+            dataSheet.getColumns().add(column);
         }
         emp.addAll(db.getAllEmployees());
         AnchorPane.setRightAnchor(dataSheet, 10.0);
@@ -164,6 +162,7 @@ public class CreateEditController {
         }
         refreshData();
     }
+
     public void refreshData() throws SQLException {
         emp.clear();
         emp.addAll(db.getAllEmployees());

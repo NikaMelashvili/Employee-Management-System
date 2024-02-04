@@ -157,6 +157,35 @@ public class Database implements Property<Object> {
             }
         }
     }
+    //    public ObservableList<Employee> getAllEmployees() throws SQLException {
+//        ObservableList<Employee> employeeList = FXCollections.observableArrayList();
+//        Connection connection = getConnection();
+//        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + userTableName);
+//        ResultSet resultSet = preparedStatement.executeQuery();
+//
+//        while (resultSet.next()) {
+//            ObservableList<Employee> data = FXCollections.observableArrayList();
+//            Employee employee;
+//            for (int i = 0; i < dataTypesSql.size(); i++) {
+//                ObservableList<Object> row = FXCollections.observableArrayList();
+//                String columnType = dataTypesSql.get(i);
+//                if ("INT".equalsIgnoreCase(columnType)) {
+//                    int intType = resultSet.getInt(columnProperties.get(i));
+//                    row.add(intType);
+//                } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
+//                    String stringType = resultSet.getString(columnProperties.get(i));
+//                    row.add(stringType);
+//                } else {
+//                    double doubleType = resultSet.getDouble(columnProperties.get(i));
+//                    row.add(doubleType);
+//                }
+//                employee = new Employee(row);
+//                data.addAll(employee);
+//            }
+//            employeeList.add((Employee) data);
+//        }
+//        return employeeList;
+//    }
     public ObservableList<Employee> getAllEmployees() throws SQLException {
         ObservableList<Employee> employeeList = FXCollections.observableArrayList();
         Connection connection = getConnection();
@@ -164,26 +193,23 @@ public class Database implements Property<Object> {
         ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
-            ObservableList<Employee> data = FXCollections.observableArrayList();
-            Employee employee;
+            Object[] rowData = new Object[dataTypesSql.size()];
+
             for (int i = 0; i < dataTypesSql.size(); i++) {
-                ObservableList<Object> row = FXCollections.observableArrayList();
                 String columnType = dataTypesSql.get(i);
+
                 if ("INT".equalsIgnoreCase(columnType)) {
-                    int intType = resultSet.getInt(columnProperties.get(i));
-                    row.add(intType);
+                    rowData[i] = resultSet.getInt(columnProperties.get(i));
                 } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
-                    String stringType = resultSet.getString(columnProperties.get(i));
-                    row.add(stringType);
+                    rowData[i] = resultSet.getString(columnProperties.get(i));
                 } else {
-                    double doubleType = resultSet.getDouble(columnProperties.get(i));
-                    row.add(doubleType);
+                    rowData[i] = resultSet.getDouble(columnProperties.get(i));
                 }
-                employee = new Employee(row);
-                data.addAll(employee);
             }
-            employeeList.add((Employee) data);
+
+            employeeList.add(new Employee(rowData));
         }
+
         return employeeList;
     }
 
