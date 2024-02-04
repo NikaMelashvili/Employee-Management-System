@@ -147,8 +147,6 @@ public class Database implements Property<Object> {
             }
             preparedStatement.executeUpdate();
             System.out.println("Row has been inserted successfully");
-//            CreateEditController createEditController = new CreateEditController();
-//            createEditController.refreshData();
         } catch (SQLException e) {
             System.err.println("Error executing the query: " + e.getMessage());
         } finally {
