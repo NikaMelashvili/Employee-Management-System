@@ -1,11 +1,18 @@
 package com.example.jdbcmysqlfull1;
 
 import javafx.beans.property.*;
+import javafx.collections.ObservableList;
 
 public class Employee {
     private final StringProperty stringValue;
     private final IntegerProperty intValue;
     private final DoubleProperty doubleValue;
+    private ObservableList<Object> resultSets;
+    public Employee(ObservableList<Object> recevedSets){
+        for(int i = 0; i < recevedSets.size(); i++){
+            this.resultSets.add(recevedSets.get(i));
+        }
+    }
     public Employee(String stringValue) {
         this.stringValue = new SimpleStringProperty(stringValue);
         this.intValue = new SimpleIntegerProperty(0);

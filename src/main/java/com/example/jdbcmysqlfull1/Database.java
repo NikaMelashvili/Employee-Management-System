@@ -164,25 +164,25 @@ public class Database implements Property<Object> {
         ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
-            ObservableList<Employee> data = FXCollections.observableArrayList(); // Move this line inside the loop
+            ObservableList<Employee> data = FXCollections.observableArrayList();
             Employee employee;
             for (int i = 0; i < dataTypesSql.size(); i++) {
+                ObservableList<Object> row = FXCollections.observableArrayList();
                 String columnType = dataTypesSql.get(i);
                 if ("INT".equalsIgnoreCase(columnType)) {
                     int intType = resultSet.getInt(columnProperties.get(i));
-                    employee = new Employee(intType);
-                    data.add(employee);
+                    row.add(intType);
                 } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
                     String stringType = resultSet.getString(columnProperties.get(i));
-                    employee = new Employee(stringType);
-                    data.add(employee);
+                    row.add(stringType);
                 } else {
                     double doubleType = resultSet.getDouble(columnProperties.get(i));
-                    employee = new Employee(doubleType);
-                    data.add(employee);
+                    row.add(doubleType);
                 }
+                employee = new Employee(row);
+                data.addAll(employee);
             }
-            employeeList.addAll(data);
+            employeeList.add((Employee) data);
         }
         return employeeList;
     }
