@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CreateEditController {
-    String url = "jdbc:mysql://localhost:3307/java";
+    String dataBase = "javaclient";
+    String url = "jdbc:mysql://localhost:3306/" + dataBase;
     String user = "root";
-    String password = "thegoatlevi123";
-    String dataBase = "java";
+    String password = "";
     @FXML
     private TextField createTableField;
     @FXML

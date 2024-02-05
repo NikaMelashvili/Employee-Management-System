@@ -6,6 +6,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -14,13 +17,15 @@ import java.util.Map;
 
 public class Database implements Property<Object> {
     String url;
-    String user;
-    String password;
+    static String user;
+    static String password;
     String dataBaseName;
+    static String adminDataBaseName = "javaadmin";
     String userTableName;
     Map<String, String> columnData = new HashMap<>();
     ObservableList<String> dataTypesSql = FXCollections.observableArrayList();
     ObservableList<String> columnProperties = FXCollections.observableArrayList();
+    public Database(){}
     public Database(String url, String user, String password, String dataBaseName){
         this.url = url;
         this.user = user;
@@ -28,20 +33,35 @@ public class Database implements Property<Object> {
         this.dataBaseName = dataBaseName;
     }
     public Connection getConnection() throws SQLException {
-        String dbUrl = url;
+        String dbUrl = "jdbc:mysql://localhost:3306/" + dataBaseName;
         String username = user;
         String pass = password;
         return DriverManager.getConnection(dbUrl, username, pass);
     }
-    public void createTable(String tableName, String[] cols, ObservableList<String> dataTypes) {
+    private static Connection getConnectionAdmin() throws SQLException {
+        String dbUrl = "jdbc:mysql://localhost:3306/" + adminDataBaseName;
+        String username = user;
+        String pass = password;
+        return DriverManager.getConnection(dbUrl, username, pass);
+    }
+    public static void useAdminDataBase() throws SQLException {
+        Connection connection = getConnectionAdmin();
+        String sql = "USE " + adminDataBaseName;
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.execute();
+    }
+    public void useDataBase() throws SQLException {
+        Connection connection = getConnection();
+        String sql = "USE " + dataBaseName;
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.execute();
+    }
+    public void createTable(String tableName, String[] cols, ObservableList<String> dataTypes) throws SQLException {
         userTableName = tableName;
         Connection connection = null;
         try {
             connection = getConnection();
-            String useDb = "USE " + dataBaseName;
-            try (PreparedStatement usePrepStatement = connection.prepareStatement(useDb)) {
-                usePrepStatement.execute();
-            }
+            useDataBase();
             StringBuilder createQuery = new StringBuilder("CREATE TABLE " + tableName + " (");
 
             for (int i = 0; i < cols.length; i++) {
@@ -81,6 +101,7 @@ public class Database implements Property<Object> {
             try (PreparedStatement preparedStatement = connection.prepareStatement(createQuery.toString())) {
                 preparedStatement.executeUpdate();
                 System.out.println("Table created successfully");
+                insertTableNameToAdminDb(userTableName);
             } catch (SQLException e) {
                 System.err.println("Error executing the query: " + e.getMessage());
             }
@@ -96,8 +117,40 @@ public class Database implements Property<Object> {
             }
         }
     }
+    public void insertTableNameToAdminDb(String tableName) throws SQLException {
+        Connection connection = getConnectionAdmin();
+        useAdminDataBase();
+        String sql = "INSERT INTO table_info(table_name_) VALUES (?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, tableName);
+        preparedStatement.execute();
+    }
+    public static ObservableList<String> retrieveCreatedTableNames(String tableName) throws SQLException {
+        useAdminDataBase();
+        ObservableList<String> tables = FXCollections.observableArrayList();
+        String columnName = "table_name_";
+
+        try (Connection connection = getConnectionAdmin()) {
+            String sql = "SELECT " + columnName + " FROM " + tableName;
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String columnValue = resultSet.getString(columnName);
+                    tables.add(columnValue);
+                }
+            }catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tables;
+    }
+
     public void addRow(List<StringProperty> textProperties) throws SQLException {
         Connection connection = getConnection();
+        useDataBase();
         StringBuilder createQuery = new StringBuilder("INSERT INTO " + userTableName + " (");
 
         for (int i = 0; i < columnProperties.size(); i++) {
@@ -157,6 +210,7 @@ public class Database implements Property<Object> {
     }
 
     public ObservableList<Employee> getAllEmployees() throws SQLException {
+        useDataBase();
         ObservableList<Employee> employeeList = FXCollections.observableArrayList();
         Connection connection = getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + userTableName);
@@ -176,11 +230,36 @@ public class Database implements Property<Object> {
                     rowData[i] = resultSet.getDouble(columnProperties.get(i));
                 }
             }
-
             employeeList.add(new Employee(rowData));
         }
 
         return employeeList;
+    }
+    public TableView<Object> tableViewingForEdit(String table) throws SQLException {
+        useDataBase();
+        TableView<Object> tableView = new TableView<>();
+        String sql = "SELECT * FROM " + table;
+        Connection connection = getConnection();
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                String columnName = resultSet.getMetaData().getColumnName(i);
+
+                TableColumn<Object, Object> column = new TableColumn<>(columnName);
+                column.setCellValueFactory(new PropertyValueFactory<>(columnName));
+                tableView.getColumns().add(column);
+            }
+            while (resultSet.next()) {
+                Object[] rowData = new Object[resultSet.getMetaData().getColumnCount()];
+                for (int i = 0; i < rowData.length; i++) {
+                    rowData[i] = resultSet.getObject(i + 1);
+                }
+                tableView.getItems().add(rowData);
+            }
+        }
+        return tableView;
     }
     @Override
     public Object getBean() {
