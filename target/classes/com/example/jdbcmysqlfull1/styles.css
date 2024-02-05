@@ -5,6 +5,29 @@
 }
 .nextButton:hover {
     -fx-background-color: #000000;
+}.positiveBtn {
+    -fx-background-color: #00A53C;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+ }
+ .positiveBtn:hover {
+    -fx-background-color: #036F3E;
+ }
+}.negativeBtn {
+    -fx-background-color: #D40028;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+}
+.negativeBtn:hover {
+    -fx-background-color: #C30022;
+}
+.selectBtn{
+    -fx-background-color: #A1E6E3;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+}
+.selectBtn:hover{
+    -fx-background-color: #B0ECDF;
 }
 .borderStyles {
     -fx-background-radius: 10;

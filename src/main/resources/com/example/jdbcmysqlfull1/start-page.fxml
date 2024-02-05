@@ -16,7 +16,7 @@
             <Font size="30.0" />
          </font>
       </Button>
-      <Button layoutX="14.0" layoutY="375.0" mnemonicParsing="false" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="View table">
+      <Button layoutX="14.0" layoutY="375.0" mnemonicParsing="false" onAction="#switchSceneToEditTable" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Edit table">
          <font>
             <Font size="30.0" />
          </font>
