@@ -1,6 +1,5 @@
 package com.example.jdbcmysqlfull1;
 
-import com.example.jdbcmysqlfull1.Database;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,43 +9,83 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ResourceBundle;
 
 public class EditTableController implements Initializable {
     @FXML
     private ComboBox<String> tableSelector;
     @FXML
-    private TableView dataSheet;
-
+    private TableView<Employee> dataSheet;
+    @FXML
+    private AnchorPane layout;
+    String tableName = "table_info";
+    ObservableList<Employee> emp = FXCollections.observableArrayList();
+    Database db = new Database();
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
-            Database database = new Database();
-            ObservableList<String> tableName = Database.retrieveCreatedTableNames("table_info");
+            ObservableList<String> tableName = Database.retrieveCreatedTableNames();
             tableSelector.setItems(tableName);
             tableSelector.setOnAction(e -> {
-                String selectedItem = tableSelector.getValue();
-                if (selectedItem != null) {
-                    try {
-                        dataSheet = database.tableViewingForEdit(selectedItem);
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    System.out.println("Not Null");
-                } else {
-                    System.out.println("Null");
-                }
+                onTableSelected(e);
             });
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    public void refreshData() throws SQLException {
-        dataSheet.getItems().clear();
+    private void onTableSelected(ActionEvent event) {
+        String selectedTableName = tableSelector.getValue();
+        if (selectedTableName != null) {
+            try {
+                dataSheet.getColumns().clear();
+                dataSheet.getItems().clear();
+                ReverseDataBase reverseDataBase = new ReverseDataBase();
+                ObservableList<String> colProps = reverseDataBase.getColumnNames(selectedTableName);
+                ObservableList<String> colDataTypes = reverseDataBase.getColumnDataTypes(selectedTableName);
+                tableViewing(colDataTypes, colProps);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+    public void tableViewing(ObservableList<String> dataTypes, ObservableList<String> columnProps) throws SQLException {
+        dataSheet.getColumns().clear();
+
+        for (int i = 0; i < columnProps.size(); i++) {
+            String columnType = dataTypes.get(i);
+            TableColumn<Employee, Object> column = new TableColumn<>(columnProps.get(i));
+
+            if ("INT".equalsIgnoreCase(columnType) || "DECIMAL".equalsIgnoreCase(columnType)) {
+                int finalI = i;
+                column.setCellValueFactory(cellData -> cellData.getValue().getProperty(finalI));
+            } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
+                int finalI1 = i;
+                column.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getProperty(finalI1).get()));
+            } else {
+                System.out.println("Table viewing went wrong");
+            }
+
+            dataSheet.getColumns().add(column);
+        }
+        emp.addAll(db.getAllEmployees(dataTypes, columnProps, tableName));
+
+//        if (!layout.getChildren().contains(dataSheet)) {
+//            layout.getChildren().add(dataSheet);
+//        }
+        refreshData(dataTypes, columnProps);
+    }
+
+    public void refreshData(ObservableList<String>dataTypes, ObservableList<String> columnProps) throws SQLException {
+        emp.clear();
+        emp.addAll(db.getAllEmployees(dataTypes, columnProps, tableName));
+        dataSheet.setItems(emp);
     }
 }

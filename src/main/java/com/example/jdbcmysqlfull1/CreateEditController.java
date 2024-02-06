@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CreateEditController {
     String dataBase = "javaclient";
-    String url = "jdbc:mysql://localhost:3306/" + dataBase;
+    String url = "jdbc:mysql://localhost:3307/" + dataBase;
     String user = "root";
-    String password = "";
+    String password = "thegoatlevi123";
     @FXML
     private TextField createTableField;
     @FXML
@@ -33,7 +33,7 @@ public class CreateEditController {
     ObservableList<StringProperty> rows = FXCollections.observableArrayList();
     ObservableList<Employee> emp = FXCollections.observableArrayList();
     private TableView<Employee> dataSheet = new TableView<>();
-    Database db = new Database(url,user,password,dataBase);
+    Database db = new Database(url,user,password);
     double initialY = 50.0;
     public void nextTableBtnAction() {
         newTableNameForQuery = createTableField.getText();
@@ -154,7 +154,7 @@ public class CreateEditController {
 
             dataSheet.getColumns().add(column);
         }
-        emp.addAll(db.getAllEmployees());
+        emp.addAll(db.getAllEmployees(db.dataTypesSql, db.columnProperties, db.userTableName));
         AnchorPane.setRightAnchor(dataSheet, 10.0);
 
         if (!layout.getChildren().contains(dataSheet)) {
@@ -165,7 +165,7 @@ public class CreateEditController {
 
     public void refreshData() throws SQLException {
         emp.clear();
-        emp.addAll(db.getAllEmployees());
+        emp.addAll(db.getAllEmployees(db.dataTypesSql, db.columnProperties, db.userTableName));
         dataSheet.setItems(emp);
     }
 }
