@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CreateEditController {
     String dataBase = "javaclient";
-    String url = "jdbc:mysql://localhost:3307/" + dataBase;
+    String url = "jdbc:mysql://localhost:3306/" + dataBase;
     String user = "root";
     String password = "thegoatlevi123";
     @FXML

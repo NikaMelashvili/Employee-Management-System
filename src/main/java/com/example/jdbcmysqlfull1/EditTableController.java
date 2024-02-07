@@ -27,8 +27,13 @@ public class EditTableController implements Initializable {
     @FXML
     private AnchorPane layout;
     String tableName = "table_info";
+    String currentTableName;
     ObservableList<Employee> emp = FXCollections.observableArrayList();
-    Database db = new Database();
+    String dataBase = "javaclient";
+    String url = "jdbc:mysql://localhost:3306/" + dataBase;
+    String user = "root";
+    String password = "thegoatlevi123";
+    Database db = new Database(url, user, password);
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
@@ -42,14 +47,14 @@ public class EditTableController implements Initializable {
         }
     }
     private void onTableSelected(ActionEvent event) {
-        String selectedTableName = tableSelector.getValue();
-        if (selectedTableName != null) {
+        currentTableName = tableSelector.getValue();
+        if (currentTableName != null) {
             try {
                 dataSheet.getColumns().clear();
                 dataSheet.getItems().clear();
                 ReverseDataBase reverseDataBase = new ReverseDataBase();
-                ObservableList<String> colProps = reverseDataBase.getColumnNames(selectedTableName);
-                ObservableList<String> colDataTypes = reverseDataBase.getColumnDataTypes(selectedTableName);
+                ObservableList<String> colProps = reverseDataBase.getColumnNames(currentTableName);
+                ObservableList<String> colDataTypes = reverseDataBase.getColumnDataTypes(currentTableName);
                 tableViewing(colDataTypes, colProps);
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -72,10 +77,9 @@ public class EditTableController implements Initializable {
             } else {
                 System.out.println("Table viewing went wrong");
             }
-
             dataSheet.getColumns().add(column);
         }
-        emp.addAll(db.getAllEmployees(dataTypes, columnProps, tableName));
+        emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName));
 
 //        if (!layout.getChildren().contains(dataSheet)) {
 //            layout.getChildren().add(dataSheet);
@@ -85,7 +89,7 @@ public class EditTableController implements Initializable {
 
     public void refreshData(ObservableList<String>dataTypes, ObservableList<String> columnProps) throws SQLException {
         emp.clear();
-        emp.addAll(db.getAllEmployees(dataTypes, columnProps, tableName));
+        emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName));
         dataSheet.setItems(emp);
     }
 }

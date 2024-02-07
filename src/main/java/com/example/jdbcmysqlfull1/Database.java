@@ -32,9 +32,10 @@ public class Database implements Property<Object> {
         this.password = password;
     }
     public static Connection getConnection(String dataBase) throws SQLException {
-        String dbUrl = "jdbc:mysql://localhost:3307/" + dataBase;
+        String dbUrl = "jdbc:mysql://localhost:3306/" + dataBase;
         String username = user;
         String pass = password;
+        System.out.println("user: " + username + ", " + "url: " + dbUrl + ", " + "password: " + pass);
         return DriverManager.getConnection(dbUrl, username, pass);
     }
 
@@ -146,7 +147,7 @@ public class Database implements Property<Object> {
         String columnName = "table_name_";
 
         try {
-            useAdminDataBase(); // Ensure we are using the admin database
+            useAdminDataBase();
             connection = getConnection(adminDataBaseName);
             String sql = "SELECT " + columnName + " FROM " + adminDataBaseName + ".table_info";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
