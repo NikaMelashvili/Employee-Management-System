@@ -26,7 +26,7 @@
             <Font size="15.0" />
          </font>
       </Label>
-      <ComboBox id="columnSelector" layoutX="194.0" layoutY="71.0" prefHeight="31.0" prefWidth="95.0" />
+      <ComboBox fx:id="columnSelectorFx" id="columnSelector" layoutX="194.0" layoutY="71.0" prefHeight="31.0" prefWidth="95.0" />
       <Label layoutX="211.0" layoutY="34.0" prefHeight="31.0" prefWidth="62.0" text="Column" textAlignment="CENTER">
          <font>
             <Font size="15.0" />

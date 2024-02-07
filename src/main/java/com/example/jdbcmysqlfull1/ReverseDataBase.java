@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ReverseDataBase {
-    public ObservableList<String> getColumnNames(String tableName) throws SQLException, SQLException {
+    public static ObservableList<String> getColumnNames(String tableName) throws SQLException {
         Database.useDataBase();
         ObservableList<String> columnNamesList = FXCollections.observableArrayList();
         Connection connection = Database.getConnection(Database.dataBaseName);
@@ -24,7 +24,7 @@ public class ReverseDataBase {
         return columnNamesList;
     }
 
-    public ObservableList<String> getColumnDataTypes(String tableName) throws SQLException {
+    public static ObservableList<String> getColumnDataTypes(String tableName) throws SQLException {
         Database.useDataBase();
         ObservableList<String> columnTypesList = FXCollections.observableArrayList();
         Connection connection = Database.getConnection(Database.dataBaseName);
@@ -37,5 +37,18 @@ public class ReverseDataBase {
         }
         System.out.println(columnTypesList);
         return columnTypesList;
+    }
+    public static String getColumnDataTypes(String columnName, String tableName) throws SQLException {
+        Database.useDataBase();
+        Connection connection = Database.getConnection(Database.dataBaseName);
+        DatabaseMetaData metaData = connection.getMetaData();
+        ResultSet columnsResultSet = metaData.getColumns(null, null, tableName, columnName);
+
+        String columnType = null;
+        if (columnsResultSet.next()) {
+            columnType = columnsResultSet.getString("TYPE_NAME");
+        }
+
+        return columnType;
     }
 }

@@ -30,5 +30,31 @@ public class SceneSwitching {
         stage.setTitle("Edit management system");
         stage.setResizable(false);
         stage.show();
+    }public void switchSceneToStartPage(ActionEvent event) throws IOException {
+        root = FXMLLoader.load(getClass().getResource("start-page.fxml"));
+        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Edit management system");
+        stage.setResizable(false);
+        stage.show();
     }
+    public void switchScene(ActionEvent event, String fxml) throws IOException {
+        root = FXMLLoader.load(getClass().getResource(fxml + ".fxml"));
+        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Edit management system");
+        stage.setResizable(false);
+        stage.show();
+    }public void switchScene(ActionEvent event, String fxml, String title) throws IOException {
+        root = FXMLLoader.load(getClass().getResource(fxml + ".fxml"));
+        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Edit management system");
+        stage.setResizable(false);
+        stage.show();
+    }
+
 }

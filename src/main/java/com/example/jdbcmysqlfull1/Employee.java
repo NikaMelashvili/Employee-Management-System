@@ -13,7 +13,6 @@ public class Employee {
             properties[i] = new SimpleObjectProperty<>(values[i]);
         }
     }
-
     public SimpleObjectProperty<Object> getProperty(int index) {
         return properties[index];
     }

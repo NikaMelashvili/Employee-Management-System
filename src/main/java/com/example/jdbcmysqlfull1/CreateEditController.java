@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,9 +119,13 @@ public class CreateEditController {
             }
             Button addRowBtn = new Button("Add row");
             addRowBtn.getStyleClass().add("nextButton");
+            Button home = new Button("Home");
+            home.getStyleClass().add("nextButton");
             addRowBtn.setLayoutX(50.0);
+            home.setLayoutX(50.0);
             AnchorPane.setTopAnchor(addRowBtn, finalTotalHeight + 20.0);
-            layout.getChildren().add(addRowBtn);
+            AnchorPane.setTopAnchor(home, finalTotalHeight + 50.0);
+            layout.getChildren().addAll(addRowBtn, home);
 
             addRowBtn.setOnAction(event1 -> {
                 try {
@@ -130,6 +135,14 @@ public class CreateEditController {
                         textField.clear();
                     }
                 } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            home.setOnAction(event2 -> {
+                SceneSwitching sceneSwitching = new SceneSwitching();
+                try {
+                    sceneSwitching.switchScene(event2, "start-page");
+                } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
             });

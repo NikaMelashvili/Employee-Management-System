@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -256,29 +257,38 @@ public class Database implements Property<Object> {
                 connection.close();
             }
         }
-
         return employeeList;
     }
-//    public static ObservableList<Employee> tableViewingForEdit(String table) throws SQLException {
-//        useDataBase();
-//        ObservableList<Employee> tableView = FXCollections.observableArrayList();
-//        String sql = "SELECT * FROM " + table;
-//        Connection connection = getConnection();
-//
-//        try (Statement statement = connection.createStatement();
-//             ResultSet resultSet = statement.executeQuery(sql)) {
-//            currentColLength = resultSet.getMetaData().getColumnCount();
-//            while (resultSet.next()) {
-//                ObservableList<Object> temp = FXCollections.observableArrayList();
-//                for (int i = 1; i <= currentColLength; i++) {
-//                    Object data = resultSet.getObject(i);
-//                    temp.add(data);
-//                }
-//                tableView.add(new Employee(temp));
-//            }
-//        }
-//        return tableView;
-//    }
+    public ObservableList<Employee> getAllEmployees(String columnName, String userTableName) throws SQLException {
+        Connection connection = null;
+        ObservableList<Employee> employeeList = FXCollections.observableArrayList();
+
+        try {
+            useDataBase();
+            connection = getConnection(dataBaseName);
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + columnName + " FROM " + userTableName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Object[] rowData = new Object[1];
+                String columnType = "";
+
+                if ("INT".equalsIgnoreCase(columnType)) {
+                    rowData[0] = resultSet.getInt(columnName);
+                } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
+                    rowData[0] = resultSet.getString(columnName);
+                } else {
+                    rowData[0] = resultSet.getDouble(columnName);
+                }
+                employeeList.add(new Employee(rowData));
+            }
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return employeeList;
+    }
     @Override
     public Object getBean() {
         return null;
