@@ -36,7 +36,7 @@ public class Database implements Property<Object> {
         String dbUrl = "jdbc:mysql://localhost:3306/" + dataBase;
         String username = user;
         String pass = password;
-        System.out.println("user: " + username + ", " + "url: " + dbUrl + ", " + "password: " + pass);
+//        System.out.println("user: " + username + ", " + "url: " + dbUrl + ", " + "password: " + pass);
         return DriverManager.getConnection(dbUrl, username, pass);
     }
 
@@ -257,9 +257,14 @@ public class Database implements Property<Object> {
                 connection.close();
             }
         }
+        for(int i = 0; i < employeeList.size(); i++){
+            System.out.println("emp list all" + employeeList.get(i));
+        }
         return employeeList;
     }
     public ObservableList<Employee> getAllEmployees(String columnName, String userTableName) throws SQLException {
+        String columnDataType = ReverseDataBase.getColumnDataTypes(columnName, userTableName);
+
         Connection connection = null;
         ObservableList<Employee> employeeList = FXCollections.observableArrayList();
 
@@ -271,15 +276,17 @@ public class Database implements Property<Object> {
 
             while (resultSet.next()) {
                 Object[] rowData = new Object[1];
-                String columnType = "";
 
-                if ("INT".equalsIgnoreCase(columnType)) {
+                if ("INT".equalsIgnoreCase(columnDataType)) {
                     rowData[0] = resultSet.getInt(columnName);
-                } else if ("VARCHAR".equalsIgnoreCase(columnType) || "DATE".equalsIgnoreCase(columnType)) {
+                } else if ("VARCHAR".equalsIgnoreCase(columnDataType) || "DATE".equalsIgnoreCase(columnDataType)) {
                     rowData[0] = resultSet.getString(columnName);
-                } else {
+                } else if ("DECIMAL".equalsIgnoreCase(columnDataType)) {
                     rowData[0] = resultSet.getDouble(columnName);
+                } else {
+                    System.err.println("Unsupported data type: " + columnDataType);
                 }
+
                 employeeList.add(new Employee(rowData));
             }
         } finally {
@@ -287,8 +294,12 @@ public class Database implements Property<Object> {
                 connection.close();
             }
         }
+        for(int i = 0; i < employeeList.size(); i++){
+            System.out.println("emp list " + employeeList.get(i));
+        }
         return employeeList;
     }
+
     @Override
     public Object getBean() {
         return null;

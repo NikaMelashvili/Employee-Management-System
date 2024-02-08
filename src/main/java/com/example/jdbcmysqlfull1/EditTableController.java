@@ -1,6 +1,8 @@
 package com.example.jdbcmysqlfull1;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -34,7 +36,9 @@ public class EditTableController implements Initializable {
     String currentColumnName;
     String colDataType;
     ObservableList<Employee> emp = FXCollections.observableArrayList();
-    Map<String, Integer> columnDataTypeAndIndex;
+    ObservableList<String> currentDataTypes = FXCollections.observableArrayList();
+    ObservableList<String> currentColProps = FXCollections.observableArrayList();
+    String currentColumnDataType;
     String dataBase = "javaclient";
     String url = "jdbc:mysql://localhost:3306/" + dataBase;
     String user = "root";
@@ -65,18 +69,19 @@ public class EditTableController implements Initializable {
                 dataSheet.getItems().clear();
                 ObservableList<String> columnNames = ReverseDataBase.getColumnNames(currentTableName);
                 columnSelectorFx.setItems(columnNames);
-                currentColumnName = columnSelectorFx.getValue();
                 ReverseDataBase reverseDataBase = new ReverseDataBase();
                 ObservableList<String> colProps = reverseDataBase.getColumnNames(currentTableName);
                 ObservableList<String> colDataTypes = reverseDataBase.getColumnDataTypes(currentTableName);
                 tableViewing(colDataTypes, colProps);
                 columnSelectorFx.setOnAction(event1 -> {
+                    currentColumnName = columnSelectorFx.getValue();
                     try {
-                        columnDataTypeAndIndex = ReverseDataBase.getColumnIndexAndType(currentColumnName);
+                        currentColumnDataType = ReverseDataBase.getColumnDataTypes(currentColumnName, currentTableName);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
                     try {
+                        colDataType = ReverseDataBase.getColumnDataTypes(currentColumnName, currentTableName);
                         tableViewing(currentColumnName, colDataType);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -94,6 +99,8 @@ public class EditTableController implements Initializable {
         for (int i = 0; i < columnProps.size(); i++) {
             String columnType = dataTypes.get(i);
             TableColumn<Employee, Object> column = new TableColumn<>(columnProps.get(i));
+            currentColProps.add(columnProps.get(i));
+            currentDataTypes.add(columnType);
 
             if ("INT".equalsIgnoreCase(columnType) || "DECIMAL".equalsIgnoreCase(columnType)) {
                 int finalI = i;
@@ -110,23 +117,36 @@ public class EditTableController implements Initializable {
         emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName));
         refreshData(dataTypes, columnProps);
     }
+
     //overloader-method 2. loads a selected column form a selected table
     public void tableViewing(String columnName, String columnDataType) throws SQLException {
         dataSheet.getColumns().clear();
-
-        TableColumn<Employee, Object> column = new TableColumn<>(columnName);
-
-        if ("INT".equalsIgnoreCase(columnDataType) || "DECIMAL".equalsIgnoreCase(columnDataType)) {
-            column.setCellValueFactory(cellData -> cellData.getValue().getProperty(columnDataTypeAndIndex.get(columnDataType)));
-        } else if ("VARCHAR".equalsIgnoreCase(columnDataType) || "DATE".equalsIgnoreCase(columnDataType)) {
-            column.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getProperty(columnDataTypeAndIndex.get(columnDataType))));
-        } else {
-            System.out.println("Table viewing went wrong");
+        ObservableList<String> colName = FXCollections.observableArrayList();
+        ObservableList<String> dataName = FXCollections.observableArrayList();
+        colName.add(columnName);
+        dataName.add(columnDataType);
+        for(int i = 0; i < colName.size(); i++){
+            TableColumn<Employee, Object> column = new TableColumn<>(columnName);
+            if ("INT".equalsIgnoreCase(columnDataType) || "DECIMAL".equalsIgnoreCase(columnDataType)) {
+                int finalI = i;
+                column.setCellValueFactory(cellData -> {
+                    ObjectProperty<Object> property = cellData.getValue().getProperty(finalI);
+                    return property != null ? new SimpleObjectProperty<>(property.getValue()) : new SimpleObjectProperty<>(null);
+                });
+            } else if ("VARCHAR".equalsIgnoreCase(columnDataType) || "DATE".equalsIgnoreCase(columnDataType)) {
+                int finalI1 = i;
+                column.setCellValueFactory(cellData -> {
+                    ObjectProperty<Object> property = cellData.getValue().getProperty(finalI1);
+                    return property != null ? new SimpleObjectProperty<>(property.getValue()) : new SimpleObjectProperty<>(null);
+                });
+            } else {
+                System.out.println("Table viewing went wrong");
+            }
+            dataSheet.getColumns().add(column);
         }
-        dataSheet.getColumns().add(column);
         emp.clear();
         emp.addAll(db.getAllEmployees(columnName, currentTableName));
-        refreshData(columnDataType, columnName);
+        refreshData(columnName);
     }
     //handles a multi-column refresh
     public void refreshData(ObservableList<String>dataTypes, ObservableList<String> columnProps) throws SQLException {
@@ -135,9 +155,9 @@ public class EditTableController implements Initializable {
         dataSheet.setItems(emp);
     }
     //handles a single-column refresh
-    public void refreshData(String dataType, String columnName) throws SQLException {
+    public void refreshData(String columnName) throws SQLException {
         emp.clear();
-        emp.addAll(db.getAllEmployees(dataType, columnName));
+        emp.addAll(db.getAllEmployees(columnName, currentTableName));
         dataSheet.setItems(emp);
     }
 }
