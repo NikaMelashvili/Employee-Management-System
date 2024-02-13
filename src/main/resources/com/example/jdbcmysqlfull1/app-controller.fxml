@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="layout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-radius: 20;" styleClass="centeredContent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jdbcmysqlfull1.CreateEditController">
+<AnchorPane fx:id="layout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-radius: 20;" styleClass="centeredContent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jdbcmysqlfull1.controllers.CreateEditController">
    <children>
       <ImageView fitHeight="96.0" fitWidth="126.0" layoutX="237.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
       <Label fx:id="newTableName" layoutX="468.0" layoutY="262.0" text="Enter the name of the table you want to create">
