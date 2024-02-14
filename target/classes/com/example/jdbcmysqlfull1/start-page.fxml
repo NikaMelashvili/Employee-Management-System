@@ -8,25 +8,25 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jdbcmysqlfull1.SceneSwitching">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jdbcmysqlfull1.SceneSwitching">
    <children>
       <Separator layoutX="229.0" layoutY="-5.0" orientation="VERTICAL" prefHeight="807.0" prefWidth="12.0" />
-      <Button layoutX="14.0" layoutY="264.0" mnemonicParsing="false" onAction="#switchSceneToCreateEdit" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Create / edit">
+      <Button layoutX="14.0" layoutY="178.0" mnemonicParsing="false" onAction="#switchSceneToCreateEdit" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Create / edit">
          <font>
             <Font size="30.0" />
          </font>
       </Button>
-      <Button layoutX="14.0" layoutY="375.0" mnemonicParsing="false" onAction="#switchSceneToEditTable" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Edit table">
+      <Button layoutX="15.0" layoutY="282.0" mnemonicParsing="false" onAction="#switchSceneToEditTable" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Edit table">
          <font>
             <Font size="30.0" />
          </font>
       </Button>
-      <Button layoutX="14.0" layoutY="487.0" mnemonicParsing="false" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Join tables">
+      <Button disable="true" layoutX="15.0" layoutY="386.0" mnemonicParsing="false" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Join tables">
          <font>
             <Font size="30.0" />
          </font>
       </Button>
-      <Button layoutX="14.0" layoutY="598.0" mnemonicParsing="false" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="Button">
+      <Button fx:id="viewRolesBtn" layoutX="14.0" layoutY="490.0" mnemonicParsing="false" onAction="#switchSceneToRoles" prefHeight="85.0" prefWidth="207.0" styleClass="nextButton" stylesheets="@styles.css" text="View Roles">
          <font>
             <Font size="30.0" />
          </font>
@@ -36,6 +36,6 @@
             <Image url="@../../../images/mysql-5-logo-png-transparent.png" />
          </image>
       </ImageView>
-      <Label layoutX="23.0" layoutY="736.0" prefHeight="40.0" prefWidth="191.0" text="Developed by: Nikoloz Melashvili" />
+      <Label layoutX="23.0" layoutY="606.0" prefHeight="40.0" prefWidth="191.0" text="Developed by: Nikoloz Melashvili" />
    </children>
 </AnchorPane>

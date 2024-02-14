@@ -22,6 +22,15 @@ public class SceneSwitching {
         stage.setResizable(false);
         stage.show();
     }
+    public void switchSceneToRoles(ActionEvent event) throws IOException {
+        root = FXMLLoader.load(getClass().getResource("roles.fxml"));
+        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Employee management system");
+        stage.setResizable(false);
+        stage.show();
+    }
     public void switchSceneToEditTable(ActionEvent event) throws IOException {
         root = FXMLLoader.load(getClass().getResource("edit-table.fxml"));
         stage = (Stage)((Node)event.getSource()).getScene().getWindow();

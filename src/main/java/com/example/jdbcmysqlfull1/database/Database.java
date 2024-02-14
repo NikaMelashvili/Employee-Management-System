@@ -37,21 +37,7 @@ public class Database implements Property<Object> {
 //        System.out.println("user: " + username + ", " + "url: " + dbUrl + ", " + "password: " + pass);
         return DriverManager.getConnection(dbUrl, username, pass);
     }
-
-    public static void useAdminDataBase() throws SQLException {
-        Connection connection = null;
-        try {
-            connection = getConnection(adminDataBaseName);
-            String sql = "USE " + adminDataBaseName + ";";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.execute();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
-        }
-    }
-    public static void useDataBase() throws SQLException {
+    public static void useDb(String dataBaseName) throws SQLException {
         Connection connection = null;
         try {
             connection = getConnection(dataBaseName);
@@ -69,7 +55,7 @@ public class Database implements Property<Object> {
             return arr;
         }
         int index = 0;
-        String element = tableName + placeHolder;
+        String element = "user" + placeHolder;
         System.out.println(element);
         for(int i = arr.length - 1; i > index; i--) {
             arr[i] = arr[i - 1];
@@ -116,7 +102,7 @@ public class Database implements Property<Object> {
         Connection connection = null;
         try {
             connection = getConnection(dataBaseName);
-            useDataBase();
+            useDb(dataBaseName);
             StringBuilder createQuery = new StringBuilder("CREATE TABLE " + tableName + " (");
 
             for (int i = 0; i < cols.length; i++) {
@@ -181,7 +167,7 @@ public class Database implements Property<Object> {
         Connection connection = null;
         try {
             connection = getConnection(adminDataBaseName);
-            useAdminDataBase();
+            useDb(adminDataBaseName);
             String sql = "INSERT INTO table_info(table_name_) VALUES (?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, tableName);
@@ -198,7 +184,7 @@ public class Database implements Property<Object> {
         String columnName = "table_name_";
 
         try {
-            useAdminDataBase();
+            useDb(adminDataBaseName);
             connection = getConnection(adminDataBaseName);
             String sql = "SELECT " + columnName + " FROM " + adminDataBaseName + ".table_info";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -215,78 +201,36 @@ public class Database implements Property<Object> {
         }
         return tables;
     }
-//    public void addRow(List<StringProperty> textProperties) throws SQLException {
-//        Connection connection = getConnection(dataBaseName);
-//        useDataBase();
-//        StringBuilder createQuery = new StringBuilder("INSERT INTO " + userTableName + " (");
-//
-//        for (int i = 0; i < columnProperties.size(); i++) {
-//            createQuery.append(columnProperties.get(i));
-//
-//            if (i < columnProperties.size() - 1) {
-//                createQuery.append(", ");
-//            }
-//        }
-//        createQuery.append(") VALUES (");
-//
-//        for (int i = 0; i < columnProperties.size(); i++) {
-//            createQuery.append("?");
-//
-//            if (i < columnProperties.size() - 1) {
-//                createQuery.append(", ");
-//            }
-//        }
-//        createQuery.append(")");
-//
-//        System.out.println("Generated Query: " + createQuery.toString());
-//        String fullQuery = createQuery.toString();
-//
-//        try (PreparedStatement preparedStatement = connection.prepareStatement(fullQuery)) {
-//            for (int i = 0; i < dataTypesSql.size(); i++) {
-//                String columnType = dataTypesSql.get(i);
-//
-//                if ("INT AUTO_INCREMENT PRIMARY KEY".equals(columnType)) {
-////                    String value = textProperties.get(i).get();
-////                    if (value == null || value.isEmpty()) {
-////                        preparedStatement.setNull(i + 1, Types.INTEGER);
-////                    } else {
-////                        int intValue = Integer.parseInt(value);
-////                        preparedStatement.setInt(i + 1, intValue);
-////                    }
-//                    break;
-//                }else if ("INT".equals(columnType)) {
-//                    String value = textProperties.get(i).get();
-//                    if (value == null || value.isEmpty()) {
-//                        preparedStatement.setNull(i + 1, Types.INTEGER);
-//                    } else {
-//                        int intValue = Integer.parseInt(value);
-//                        preparedStatement.setInt(i + 1, intValue);
-//                    }
-//                } else if (("VARCHAR".equals(columnType)) || ("DATE".equals(columnType))) {
-//                    preparedStatement.setString(i + 1, textProperties.get(i).get());
-//                } else if ("DECIMAL".equals(columnType)) {
-//                    String value = textProperties.get(i).get();
-//                    if (value == null || value.isEmpty()) {
-//                        preparedStatement.setNull(i + 1, Types.DECIMAL);
-//                    } else {
-//                        double doubleValue = Double.parseDouble(value);
-//                        preparedStatement.setDouble(i + 1, doubleValue);
-//                    }
-//                }
-//            }
-//            preparedStatement.executeUpdate();
-//            System.out.println("Row has been inserted successfully");
-//        } catch (SQLException e) {
-//            System.err.println("Error executing the query: " + e.getMessage());
-//        } finally {
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
-//    }
+    public static ObservableList<String> retrieveCreatedTableNames(String columnName, String tableName, String dataBase) throws SQLException {
+        Connection connection = null;
+        ObservableList<String> tables = FXCollections.observableArrayList();
+
+        try {
+            connection = getConnection(dataBase);
+            String sql = "SELECT " + columnName + " FROM " + tableName;
+            System.out.println("SQL Query: " + sql);
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String columnValue = resultSet.getString(columnName);
+                    tables.add(columnValue);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error executing SQL query: " + e.getMessage());
+            throw e;
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return tables;
+    }
+
     public void addRow(List<StringProperty> textProperties, String[] cols) throws SQLException {
         Connection connection = getConnection(dataBaseName);
-        useDataBase();
+        useDb(dataBaseName);
 
         StringBuilder createQuery = new StringBuilder("INSERT INTO " + userTableName + " (");
         for (int i = 1; i < cols.length; i++) {
@@ -328,14 +272,13 @@ public class Database implements Property<Object> {
             }
         }
     }
-
-    public ObservableList<Employee> getAllEmployees(ObservableList<String> dataTypesSql, ObservableList<String> columnProperties, String userTableName) throws SQLException {
-        Connection connection = null;
+    //    returns full table
+    public ObservableList<Employee> getAllEmployees(ObservableList<String> dataTypesSql, ObservableList<String> columnProperties, String userTableName, String dataBase) throws SQLException {
+        System.out.println(dataBase + " this is the user db");
         ObservableList<Employee> employeeList = FXCollections.observableArrayList();
-
+        Connection connection = null;
         try {
-            useDataBase();
-            connection = getConnection(dataBaseName);
+            connection = getConnection(dataBase);
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + userTableName);
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -344,7 +287,6 @@ public class Database implements Property<Object> {
 
                 for (int i = 0; i < dataTypesSql.size(); i++) {
                     String columnType = dataTypesSql.get(i);
-
 
                     if ("INT".equalsIgnoreCase(columnType) || "INT AUTO_INCREMENT PRIMARY KEY".equalsIgnoreCase(columnType)) {
                         rowData[i] = resultSet.getInt(columnProperties.get(i));
@@ -361,19 +303,20 @@ public class Database implements Property<Object> {
                 connection.close();
             }
         }
-        for(int i = 0; i < employeeList.size(); i++){
-            System.out.println("emp list all" + employeeList.get(i));
-        }
+//        for (int i = 0; i < employeeList.size(); i++) {
+//            System.out.println("emp list all " + employeeList.get(i));
+//        }
         return employeeList;
     }
-    public ObservableList<Employee> getAllEmployees(String columnName, String userTableName) throws SQLException {
+    //    returns column
+    public static ObservableList<Employee> getAllEmployees(String columnName, String userTableName) throws SQLException {
         String columnDataType = ReverseDataBase.getColumnDataTypes(columnName, userTableName);
 
         Connection connection = null;
         ObservableList<Employee> employeeList = FXCollections.observableArrayList();
 
         try {
-            useDataBase();
+            useDb(dataBaseName);
             connection = getConnection(dataBaseName);
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT " + columnName + " FROM " + userTableName);
             ResultSet resultSet = preparedStatement.executeQuery();

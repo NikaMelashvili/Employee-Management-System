@@ -40,6 +40,7 @@ public class EditTableController implements Initializable {
     String user = "root";
     String password = "thegoatlevi123";
     Database db = new Database(url, user, password);
+    ReverseDataBase reverseDataBase = new ReverseDataBase(user, password);
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
@@ -63,11 +64,11 @@ public class EditTableController implements Initializable {
             try {
                 dataSheet.getColumns().clear();
                 dataSheet.getItems().clear();
-                ObservableList<String> columnNames = ReverseDataBase.getColumnNames(currentTableName);
+                ObservableList<String> columnNames = ReverseDataBase.getColumnNames(currentTableName, "javaclient");
                 columnSelectorFx.setItems(columnNames);
-                ReverseDataBase reverseDataBase = new ReverseDataBase();
-                ObservableList<String> colProps = reverseDataBase.getColumnNames(currentTableName);
-                ObservableList<String> colDataTypes = reverseDataBase.getColumnDataTypes(currentTableName);
+                ReverseDataBase reverseDataBase = new ReverseDataBase("root", "thegoatlevi123");
+                ObservableList<String> colProps = reverseDataBase.getColumnNames(currentTableName, "javaclient");
+                ObservableList<String> colDataTypes = reverseDataBase.getColumnDataTypes(currentTableName, "javaclient", 1);
                 tableViewing(colDataTypes, colProps);
                 columnSelectorFx.setOnAction(event1 -> {
                     currentColumnName = columnSelectorFx.getValue();
@@ -110,7 +111,7 @@ public class EditTableController implements Initializable {
             dataSheet.getColumns().add(column);
         }
         emp.clear();
-        emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName));
+        emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName, dataBase));
         refreshData(dataTypes, columnProps);
     }
 
@@ -147,7 +148,7 @@ public class EditTableController implements Initializable {
     //handles a multi-column refresh
     public void refreshData(ObservableList<String>dataTypes, ObservableList<String> columnProps) throws SQLException {
         emp.clear();
-        emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName));
+        emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName, dataBase));
         dataSheet.setItems(emp);
     }
     //handles a single-column refresh

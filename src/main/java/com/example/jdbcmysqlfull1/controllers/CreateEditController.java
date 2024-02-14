@@ -165,10 +165,9 @@ public class CreateEditController {
             } else {
                 System.out.println("Table viewing went wrong");
             }
-
             dataSheet.getColumns().add(column);
         }
-        emp.addAll(db.getAllEmployees(db.dataTypesSql, db.columnProperties, db.userTableName));
+        emp.addAll(db.getAllEmployees(db.dataTypesSql, db.columnProperties, db.userTableName, dataBase));
         AnchorPane.setRightAnchor(dataSheet, 10.0);
 
         if (!layout.getChildren().contains(dataSheet)) {
@@ -179,7 +178,7 @@ public class CreateEditController {
 
     public void refreshData() throws SQLException {
         emp.clear();
-        emp.addAll(db.getAllEmployees(db.dataTypesSql, db.columnProperties, db.userTableName));
+        emp.addAll(db.getAllEmployees(db.dataTypesSql, db.columnProperties, db.userTableName, dataBase));
         dataSheet.setItems(emp);
     }
 }
