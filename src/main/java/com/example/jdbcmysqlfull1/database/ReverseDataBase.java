@@ -48,7 +48,7 @@ public class ReverseDataBase {
             String columnName = columnsResultSet.getString("COLUMN_NAME");
             columnNamesList.add(columnName);
         }
-//        System.out.println(columnNamesList);
+        System.out.println(columnNamesList);
         return columnNamesList;
     }
 
@@ -63,7 +63,7 @@ public class ReverseDataBase {
             String columnType = columnsResultSet.getString("TYPE_NAME");
             columnTypesList.add(columnType);
         }
-//        System.out.println(columnTypesList);
+        System.out.println(columnTypesList);
         return columnTypesList;
     }
     public static String getColumnDataTypes(String columnName, String tableName) throws SQLException {
@@ -76,7 +76,7 @@ public class ReverseDataBase {
         if (columnsResultSet.next()) {
             columnType = columnsResultSet.getString("TYPE_NAME");
         }
-//        System.out.println(columnType);
+        System.out.println(columnType);
         return columnType;
     }
 }

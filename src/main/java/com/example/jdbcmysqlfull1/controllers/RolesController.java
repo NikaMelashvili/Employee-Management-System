@@ -31,6 +31,9 @@ public class RolesController implements Initializable {
     ObservableList<String> currentColProps = FXCollections.observableArrayList();
     ObservableList<String> currentDataTypes = FXCollections.observableArrayList();
     String currentTableName;
+    int currentIdNumberUser;
+    int currentIdNumberRole;
+    String currentColName = "user_id";
     String dataBase = "javaclient";
     String adminDataBase = "javaadmin";
     String user = "root";
@@ -43,26 +46,34 @@ public class RolesController implements Initializable {
         try {
             load();
             roleTable();
-//            userBox();
+            ObservableList<String> items = loadARoleId();
+            userIdComboBox.setItems(items);
             System.out.println(currentTableName);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
     public void load() throws SQLException {
-        ObservableList<String> dataTypes = ReverseDataBase.getColumnDataTypes("roles", adminDataBase, 1);
-//        System.out.println(dataTypes);
-        ObservableList<String> colProps = ReverseDataBase.getColumnNames("roles", adminDataBase);
-//        System.out.println(colProps);
+        ObservableList<String> dataTypes = ReverseDataBase.getColumnDataTypes("roles", adminDataBase, 1); // works
+        System.out.println(dataTypes);
+        ObservableList<String> colProps = ReverseDataBase.getColumnNames("roles", adminDataBase); // works
+        System.out.println(colProps);
         tableViewing(dataTypes, colProps, "roles");
     }
     public void roleTable() throws SQLException {
         ObservableList<String> tableNames = Database.retrieveCreatedTableNames();
-        System.out.println(tableNames);
+//        System.out.println(tableNames);
         userTableComboBox.setItems(tableNames);
         userTableComboBox.setOnAction(event -> {
             String selectedTable = userTableComboBox.getValue();
             currentTableName = selectedTable;
+            System.out.println(currentTableName + " current table name");
+            try {
+                userBox();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             try {
                 ObservableList<String> colNames = ReverseDataBase.getColumnNames(selectedTable, dataBase);
                 ObservableList<String> colDataTypes = ReverseDataBase.getColumnDataTypes(selectedTable, dataBase, 1);
@@ -72,9 +83,34 @@ public class RolesController implements Initializable {
             }
         });
     }
+    public ObservableList<String> loadARoleId() throws SQLException {
+        ObservableList<String> items;
+        String roles = "roles";
+        String colName = "role_id";
+        items = Database.retrieveCreatedTableNames(colName, roles, adminDataBase);
+        return items;
+    }
     public void userBox() throws SQLException {
-        ObservableList<String> userNames = Database.retrieveCreatedTableNames("user_id", currentTableName, dataBase);
-        userComboBox.setItems(userNames);
+        System.out.println(currentTableName);
+        ObservableList<String> userNamesList = Database.retrieveCreatedTableNames("user_id", currentTableName, dataBase);
+        userComboBox.setItems(userNamesList);
+        userComboBox.setOnAction(event -> {
+            String currentIdNumberUserString = userComboBox.getValue();
+            try {
+                currentIdNumberUser = Integer.parseInt(currentIdNumberUserString);
+            } catch (NumberFormatException e) {
+                System.err.println("Error: The value is not a valid integer.");
+            }
+        });
+        userIdComboBox.setOnAction(event -> {
+            String currentIdNumberUserString = userComboBox.getValue();
+            try {
+                currentIdNumberRole = Integer.parseInt(currentIdNumberUserString);
+            } catch (NumberFormatException e) {
+                System.err.println("Error: The value is not a valid integer.");
+            }
+        });
+//        Database.foreignKeyAssignment(currentTableName, currentIdNumberUser, "user_roles", );
     }
     public void tableViewing(ObservableList<String> dataTypes, ObservableList<String> columnProps, String currentTableName) throws SQLException {
         rolesTable.getColumns().clear();
@@ -98,6 +134,7 @@ public class RolesController implements Initializable {
         }
         emp.clear();
         emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName, adminDataBase));
+        System.out.println(dataTypes + " " + columnProps + " " + currentTableName + " " + adminDataBase);
         refreshData(dataTypes, columnProps,currentTableName);
     }
     public void tableViewingForUsers(ObservableList<String> dataTypes, ObservableList<String> columnProps, String currentTableName) throws SQLException {
@@ -120,13 +157,14 @@ public class RolesController implements Initializable {
         }
         emp1.clear();
         emp1.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName, dataBase));
-        System.out.println(dataBase);
+//        System.out.println(dataBase);
         refreshDataForUser(dataTypes, columnProps,currentTableName);
         System.out.println("refreshed data");
     }
     public void refreshData(ObservableList<String>dataTypes, ObservableList<String> columnProps, String currentTableName) throws SQLException {
         emp.clear();
         emp.addAll(db.getAllEmployees(dataTypes, columnProps, currentTableName, adminDataBase));
+        System.out.println(dataTypes + " " + columnProps + " " + currentTableName + " " + adminDataBase);
         rolesTable.setItems(emp);
     }
     public void refreshDataForUser(ObservableList<String>dataTypes, ObservableList<String> columnProps, String currentTableName) throws SQLException {
