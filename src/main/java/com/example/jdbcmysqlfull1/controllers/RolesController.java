@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -26,13 +27,17 @@ public class RolesController implements Initializable {
     private ComboBox<String> userComboBox;
     @FXML
     private ComboBox<String> userIdComboBox;
+    @FXML
+    private Button addBtn;
     ObservableList<Employee> emp = FXCollections.observableArrayList();
     ObservableList<Employee> emp1 = FXCollections.observableArrayList();
     ObservableList<String> currentColProps = FXCollections.observableArrayList();
     ObservableList<String> currentDataTypes = FXCollections.observableArrayList();
     String currentTableName;
-    int currentIdNumberUser;
-    int currentIdNumberRole;
+    String currentIdNumberUser;
+    Boolean notEmptyNum = false;
+    String currentIdNumberRole;
+    Boolean notEmptyRole = false;
     String currentColName = "user_id";
     String dataBase = "javaclient";
     String adminDataBase = "javaadmin";
@@ -95,22 +100,23 @@ public class RolesController implements Initializable {
         ObservableList<String> userNamesList = Database.retrieveCreatedTableNames("user_id", currentTableName, dataBase);
         userComboBox.setItems(userNamesList);
         userComboBox.setOnAction(event -> {
-            String currentIdNumberUserString = userComboBox.getValue();
-            try {
-                currentIdNumberUser = Integer.parseInt(currentIdNumberUserString);
-            } catch (NumberFormatException e) {
-                System.err.println("Error: The value is not a valid integer.");
-            }
+            currentIdNumberUser = userComboBox.getValue();
+            notEmptyNum = true;
         });
         userIdComboBox.setOnAction(event -> {
-            String currentIdNumberUserString = userComboBox.getValue();
-            try {
-                currentIdNumberRole = Integer.parseInt(currentIdNumberUserString);
-            } catch (NumberFormatException e) {
-                System.err.println("Error: The value is not a valid integer.");
-            }
+            currentIdNumberRole = userComboBox.getValue();
+            notEmptyRole = true;
         });
-//        Database.foreignKeyAssignment(currentTableName, currentIdNumberUser, "user_roles", );
+
+            addBtn.setOnAction(event -> {
+                try {
+                    if(notEmptyNum && notEmptyRole == true) {
+                        Database.addRow(currentIdNumberUser, currentTableName, currentIdNumberRole, "user_roles");
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
     public void tableViewing(ObservableList<String> dataTypes, ObservableList<String> columnProps, String currentTableName) throws SQLException {
         rolesTable.getColumns().clear();

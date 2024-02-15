@@ -9,10 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Database implements Property<Object> {
     String url;
@@ -271,6 +268,44 @@ public class Database implements Property<Object> {
             connection.close();
             }
         }
+    }
+    public static void addRow(String userId, String userTable, String roleId, String roleTable) throws SQLException {
+        Connection connection = getConnection(adminDataBaseName);
+
+        String sql = "INSERT INTO " + roleTable + " (user_id, role_id) VALUES (" + userId + ", " + roleId + ");";
+        System.out.println("Generated Query: " + sql);
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.executeUpdate();
+            System.out.println("Row has been inserted successfully");
+        } catch (SQLException e) {
+            System.err.println("Error executing the query: " + e.getMessage());
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        assignForeignKey("user_id", userTable, "role_id", roleTable);
+    }
+    public static void assignForeignKey(String userCol, String userTable, String roleCol, String roleTable) throws SQLException {
+        Connection connection = getConnection(adminDataBaseName);
+        String sql = "ALTER TABLE " + adminDataBaseName + "." + roleTable +
+                " ADD CONSTRAINT" +
+                " FOREIGN KEY (" + userCol +")" +
+                " REFERENCES " + dataBaseName + "." + userTable + " (" + userCol + ");";
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.executeUpdate();
+            System.out.println("Successfully inserted foreign key");
+        } catch (SQLException e){
+            System.err.println("Error executing the query: " + e.getMessage());
+        } finally {
+            if(connection != null){
+                connection.close();
+            }
+        }
+    }
+    public void joinTables(){
+
     }
     //    returns full table
     public ObservableList<Employee> getAllEmployees(ObservableList<String> dataTypesSql, ObservableList<String> columnProperties, String userTableName, String dataBase) throws SQLException {
